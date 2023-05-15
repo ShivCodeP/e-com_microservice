@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useAddToCart } from "../Hooks/product/product.hooks";
+import { useBuyProduct } from "../Hooks/order/order.hooks";
 
 interface ProductProps {
   _id: string;
@@ -19,8 +20,13 @@ interface ProductProps {
 
 export const ProductCard = (props: ProductProps) => {
   const { mutate: addToCart, isLoading: addingToCart } = useAddToCart();
+  const { mutate: buyProduct, isLoading: buying } = useBuyProduct();
   const handleAddToCart = () => {
     addToCart({ payload: { _id: props?._id } });
+  };
+
+  const handleBuyProduct = () => {
+    buyProduct({ payload: { _id: props?._id } });
   };
 
   return (
@@ -46,8 +52,13 @@ export const ProductCard = (props: ProductProps) => {
         >
           {!addingToCart ? "Add to Cart" : <CircularProgress size={30} />}
         </Button>
-        <Button variant="contained" color="primary" className="rounded w-40">
-          Buy Now
+        <Button
+          variant="contained"
+          color="primary"
+          className="rounded w-40"
+          onClick={handleBuyProduct}
+        >
+          {!buying ? "Buy Now" : <CircularProgress size={30} />}
         </Button>
       </Box>
     </Card>

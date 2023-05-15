@@ -25,7 +25,6 @@ app.get("/auth/v1", async (req, res) => {
 app.post("/auth/register", async (req, res) => {
   try {
     const userData = req.body;
-    console.log(userData);
     if (userData?.password?.length < 8) {
       return res.status(400).json({
         message: "Password length should be greater than equal to 8 character",

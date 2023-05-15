@@ -42,7 +42,7 @@ function Auth() {
           <Link to={"/orders"}>Order</Link>
         </div>
       </div>
-      <div className="h-screen w-5/6 m-auto mt-8">
+      <div className="h-screen w-5/6 m-auto mt-8 overflow-auto">
         <Routes>
           <Route path="/home" Component={Home} />
           <Route path="/products" Component={Products} />

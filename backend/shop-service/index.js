@@ -31,6 +31,49 @@ app.get("/shop/list", authenticated, async (req, res) => {
   }
 });
 
+app.get("/shop/listorder", authenticated, async (req, res) => {
+  try {
+    const userData = req.currentUser?.user;
+    // pagination can be added
+    channel.sendToQueue(
+      "ORDER",
+      Buffer.from(
+        JSON.stringify({
+          type: "listOrders",
+          payload: {
+            userId: userData?._id,
+          },
+        })
+      )
+    );
+
+    channel.consume("SHOP", async (data) => {
+      try {
+        let response = await JSON.parse(data.content);
+        channel.ack(data);
+        if (!response) {
+          return res.json({ message: "Something went wrong!" });
+        }
+        const orders = [];
+        for await (const each of response?.orders || []) {
+          const products = await ProductModel.find({
+            _id: { $in: each.products },
+          }).lean();
+          each.products = products;
+          orders.push(each);
+        };
+        return res.json({ orders });
+      } catch (err) {
+        console.log(err);
+      }
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: error?.message || "Something went wrong!" });
+  }
+});
+
 app.post("/shop/createProduct", authenticated, async (req, res) => {
   try {
     const product = req.body;
@@ -93,7 +136,6 @@ app.post("/shop/buyProduct", authenticated, async (req, res) => {
     if (!product) {
       return res.status(500).json({ message: "Product not found!" });
     }
-    let order;
     channel.sendToQueue(
       "ORDER",
       Buffer.from(
@@ -106,12 +148,7 @@ app.post("/shop/buyProduct", authenticated, async (req, res) => {
         })
       )
     );
-    channel.consume("SHOP", (data) => {
-      console.log("Consuming the SHOP queue!");
-      order = JSON.parse(data.content);
-      channel.ack(data);
-      return res.status(200).json(order);
-    });
+    return res.status(201).json({ message: "Ordered Successfully!" });
   } catch (error) {
     return res
       .status(500)

@@ -37,7 +37,6 @@ function _AuthProvider(props: AuthProviderProps) {
         authenticated: false,
         check,
         login: (token, remember) => {
-            console.log(token);
           if (remember) localStorage?.setItem("token_sarva", token);
           setToken(token);
         },
